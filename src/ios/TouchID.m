@@ -21,7 +21,7 @@ NSString *keychainItemServiceName;
     NSError *error = nil;
     LAContext *laContext = [[LAContext alloc] init];
 
-    if ([laContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&error]) {
+    if ([laContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&error]) {
       NSString *biometryType = @"touch";
       if (@available(iOS 11.0, *)) {
         if (laContext.biometryType == LABiometryTypeFaceID) {
@@ -30,6 +30,9 @@ NSString *keychainItemServiceName;
       }
       [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:biometryType]
                                   callbackId:command.callbackId];
+    } else if ([laContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&error]) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"passcode"]
+                                    callbackId:command.callbackId];
     } else {
       NSArray *errorKeys = @[@"code", @"localizedDescription"];
       [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:[error dictionaryWithValuesForKeys:errorKeys]]
